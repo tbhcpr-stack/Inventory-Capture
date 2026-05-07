@@ -10172,14 +10172,26 @@ body {
 
 .scroll-content {
   flex: 1;
-  overflow-y: auto;
-  padding: 20px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 500px;
-  margin: 0 auto;
-  width: 100%;
+  min-height: 0;
+}
+
+.viewfinder-wrap {
+  flex: 1;
+  position: relative;
+  background: #000;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+.name-section-bar {
+  padding: 14px 16px;
+  background: var(--surface);
+  border-top: 0.5px solid var(--border);
+  flex-shrink: 0;
 }
 
 .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
@@ -10200,15 +10212,6 @@ body {
 }
 .settings-btn:active { transform: rotate(45deg) scale(0.9); }
 
-.viewfinder-wrap { 
-  position: relative; 
-  background: #000; 
-  border-radius: var(--radius);
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  flex: 1;
-  display: flex;
-}
 #video, #qr-video { width: 100%; height: 100%; object-fit: cover; display: block; }
 #canvas { display: none; }
 
@@ -10337,12 +10340,10 @@ body {
 <div class="toast" id="toast"></div>
 
 <div class="header">
-  <div class="logo" style="max-width: 500px; margin: 0 auto; width: 100%; display: flex; justify-content: space-between; align-items: center;">
-    <div>Snap<span>Name</span></div>
-    <button class="settings-btn" id="settings-btn" aria-label="Settings">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-    </button>
-  </div>
+  <div>Snap<span>Name</span></div>
+  <button class="settings-btn" id="settings-btn" aria-label="Settings">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+  </button>
 </div>
 
 <div class="scroll-content">
@@ -10371,32 +10372,29 @@ body {
       </div>
     </div>
   </div>
+</div>
 
-  <div class="name-section">
-    <div class="field-label">Inventory Name</div>
-    <div class="name-row">
-      <input type="text" id="name-input" class="name-input" placeholder="Enter or scan name..." autocomplete="off">
-      <button class="barcode-btn" id="qr-btn" aria-label="Scan barcode">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="7" y="7" width="10" height="10" rx="2"></rect></svg>
-      </button>
-    </div>
+<div class="name-section-bar">
+  <div class="field-label" style="margin-bottom: 8px;">Inventory Name</div>
+  <div class="name-row">
+    <input type="text" id="name-input" class="name-input" placeholder="Enter or scan name..." autocomplete="off">
+    <button class="barcode-btn" id="qr-btn" aria-label="Scan barcode">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect x="7" y="7" width="10" height="10" rx="2"></rect></svg>
+    </button>
   </div>
-
 </div>
 
 <div class="bottom-bar">
-  <div style="max-width: 500px; margin: 0 auto; width: 100%;">
-    <button class="capture-btn" id="capture-btn" aria-label="Capture Photo"></button>
-    <div class="preview-actions" id="preview-actions">
-      <button class="btn btn-reject" id="reject-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"></path></svg>
-        Reject
-      </button>
-      <button class="btn btn-save" id="save-btn">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-        Save
-      </button>
-    </div>
+  <button class="capture-btn" id="capture-btn" aria-label="Capture Photo"></button>
+  <div class="preview-actions" id="preview-actions">
+    <button class="btn btn-reject" id="reject-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+      Reject
+    </button>
+    <button class="btn btn-save" id="save-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+      Save
+    </button>
   </div>
 </div>
 
@@ -10501,6 +10499,7 @@ body {
       video.srcObject = stream;
       await video.play();
 
+<<<<<<< HEAD
       // Apply optimal Chrome Mobile camera settings
       const track = stream.getVideoTracks()[0];
       const capabilities = track.getCapabilities ? track.getCapabilities() : {};
@@ -10541,6 +10540,16 @@ body {
         }
       });
 
+=======
+      // Try enabling continuous focus mode if supported
+      const track = stream.getVideoTracks()[0];
+      const capabilities = track.getCapabilities();
+      if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+        await track.applyConstraints({
+          advanced: [{ focusMode: 'continuous' }]
+        }).catch(e => console.log('focusMode error', e));
+      }
+>>>>>>> 59f067b099f75e09c1f783091b059ae6991f5422
     } catch(e) {
       showToast('Camera error: ' + e.message);
     }
@@ -10702,6 +10711,7 @@ body {
     }
   };
 
+<<<<<<< HEAD
   // ── Barcode Scanner ─────────────────────────────────────────────────────────
   // Primary: native BarcodeDetector (Chrome Android) — EAN-13, UPC, Code-128, etc.
   // Fallback: jsQR (QR codes only) for browsers without BarcodeDetector.
@@ -10709,6 +10719,11 @@ body {
   let nativeBarcodeDetector = null;
   let scanPending = false; // prevents async pile-up in BarcodeDetector loop
 
+=======
+  // Barcode Scanner Logic — uses native BarcodeDetector (EAN-13, UPC-A, Code-128, Code-39, QR, etc.)
+  // Falls back to jsQR (QR codes only) on unsupported browsers.
+  let nativeBarcodeDetector = null;
+>>>>>>> 59f067b099f75e09c1f783091b059ae6991f5422
   const SUPPORTED_FORMATS = [
     'ean_13','ean_8','upc_a','upc_e',
     'code_39','code_128','code_93',
@@ -10722,6 +10737,7 @@ body {
         const formats = SUPPORTED_FORMATS.filter(f => supported.includes(f));
         if (formats.length > 0) {
           nativeBarcodeDetector = new BarcodeDetector({ formats });
+<<<<<<< HEAD
           console.log('[BarcodeDetector] ready, formats:', formats.join(', '));
         }
       } catch(e) {
@@ -10730,6 +10746,26 @@ body {
     } else {
       console.log('[BarcodeDetector] not available, using jsQR fallback');
     }
+=======
+          console.log('BarcodeDetector ready, formats:', formats);
+        }
+      } catch(e) {
+        console.log('BarcodeDetector init failed, using jsQR fallback:', e);
+      }
+    } else {
+      console.log('BarcodeDetector not available, using jsQR fallback');
+    }
+  }
+
+  initBarcodeDetector();
+
+  function startQrScan() {
+    if (scanning) return;
+    scanning = true;
+    qrBtn.classList.add('scanning');
+    qrScanBox.classList.add('active');
+    scanFrame();
+>>>>>>> 59f067b099f75e09c1f783091b059ae6991f5422
   }
 
   initBarcodeDetector();
@@ -10785,6 +10821,7 @@ body {
     releaseWakeLock();
   }
 
+<<<<<<< HEAD
   function startScan() {
     if (scanning) { stopScan(); return; }
     scanning = true;
@@ -10856,6 +10893,65 @@ body {
 
   qrBtn.onclick = startScan;
   qrCancel.onclick = stopScan;
+=======
+  // Native BarcodeDetector scans directly from the video stream (no canvas needed)
+  async function scanWithNativeDetector() {
+    if (!scanning) return;
+    try {
+      const barcodes = await nativeBarcodeDetector.detect(video);
+      if (barcodes.length > 0 && barcodes[0].rawValue.trim()) {
+        nameInput.value = barcodes[0].rawValue.trim();
+        stopQrScan();
+        showToast('✓ Barcode Decoded!');
+        return;
+      }
+    } catch(e) {}
+    if (scanning) qrAnimId = requestAnimationFrame(scanWithNativeDetector);
+  }
+
+  // jsQR fallback — QR codes only, uses canvas
+  function scanFrame() {
+    if (!scanning) return;
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      let w = video.videoWidth, h = video.videoHeight;
+      const maxDim = 640;
+      if (w > maxDim || h > maxDim) {
+        const ratio = Math.min(maxDim / w, maxDim / h);
+        w = Math.floor(w * ratio);
+        h = Math.floor(h * ratio);
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(video, 0, 0, w, h);
+      try {
+        const imgData = canvas.getContext('2d').getImageData(0, 0, w, h);
+        const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
+        if (code && code.data.trim()) {
+          nameInput.value = code.data.trim();
+          stopQrScan();
+          showToast('✓ QR Decoded!');
+          return;
+        }
+      } catch(e) {}
+    }
+    if (scanning) qrAnimId = requestAnimationFrame(scanFrame);
+  }
+
+  function startScan() {
+    if (scanning) { stopQrScan(); return; }
+    scanning = true;
+    qrBtn.classList.add('scanning');
+    qrScanBox.classList.add('active');
+    // Use native detector if available (handles real barcodes), else jsQR fallback
+    if (nativeBarcodeDetector) {
+      qrAnimId = requestAnimationFrame(scanWithNativeDetector);
+    } else {
+      scanFrame();
+    }
+  }
+
+  qrBtn.onclick = startScan;
+  qrCancel.onclick = stopQrScan;
+>>>>>>> 59f067b099f75e09c1f783091b059ae6991f5422
 
   initCamera();
 })();
