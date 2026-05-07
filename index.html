@@ -504,6 +504,9 @@ input[type=range]::-moz-range-thumb{
 <canvas id="hidden-canvas"></canvas>
 <div class="toast" id="toast"></div>
 
+<!-- ZXing for cross-browser barcode scanning fallback -->
+<script type="text/javascript" src="https://unpkg.com/@zxing/browser@latest"></script>
+
 <script>
 (function(){
 'use strict';
@@ -858,29 +861,62 @@ function stopQr(){
   scanning=false; qrBtn.classList.remove('on'); qrOverlay.classList.remove('visible');
   if(qrAnim){cancelAnimationFrame(qrAnim);qrAnim=null;}
 }
-let barcodeDetector = null;
+let nativeBarcodeDetector = null;
 if (window.BarcodeDetector) {
-  barcodeDetector = new BarcodeDetector();
+  nativeBarcodeDetector = new BarcodeDetector();
 }
+// Initialize ZXing as fallback
+const zxingReader = (window.ZXingBrowser && window.ZXingBrowser.BrowserMultiFormatReader) ? new window.ZXingBrowser.BrowserMultiFormatReader() : null;
+let lastScan = 0;
 
 async function scanFrame(){
   if(!scanning)return;
   if(video.readyState===video.HAVE_ENOUGH_DATA){
-    try{
-      if (!barcodeDetector) {
-        toast('Barcode reading not supported in this browser', 'err');
-        stopQr();
-        return;
-      }
-      const barcodes = await barcodeDetector.detect(video);
-      if(barcodes && barcodes.length > 0){
-        const val=barcodes[0].rawValue.trim().replace(/[^a-zA-Z0-9_\-. ]/g,'_');
-        nameInp.value=val; nameInp.classList.add('filled');
-        stopQr(); toast('Name from barcode: '+val,'ok'); nameInp.focus(); return;
-      }
-    }catch(e){}
+    const now = Date.now();
+    // Throttle scanning to avoid heavy CPU usage, especially with ZXing
+    if (now - lastScan > 350) {
+      lastScan = now;
+      try{
+        if (nativeBarcodeDetector) {
+          const barcodes = await nativeBarcodeDetector.detect(video);
+          if(barcodes && barcodes.length > 0){
+            handleBarcode(barcodes[0].rawValue);
+            return;
+          }
+        } else if (zxingReader) {
+          // Fallback: draw frame to hidden canvas and decode with ZXing
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          
+          try {
+            const result = await zxingReader.decodeFromCanvas(canvas);
+            if (result && result.getText()) {
+              handleBarcode(result.getText());
+              return;
+            }
+          } catch(err) {
+            // ZXing throws NotFoundException when no barcode is present in the frame
+          }
+        } else {
+          toast('Barcode reading not supported (ZXing failed to load)', 'err');
+          stopQr();
+          return;
+        }
+      }catch(e){}
+    }
   }
   qrAnim=requestAnimationFrame(scanFrame);
+}
+
+function handleBarcode(rawVal) {
+  const val = rawVal.trim().replace(/[^a-zA-Z0-9_\-. ]/g,'_');
+  nameInp.value = val; 
+  nameInp.classList.add('filled');
+  stopQr(); 
+  toast('Name from barcode: '+val,'ok'); 
+  nameInp.focus();
 }
 
 // ── SETTINGS SHEET ──
