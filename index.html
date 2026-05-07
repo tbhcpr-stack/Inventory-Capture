@@ -224,9 +224,9 @@ body{
 }
 
 /* quality chips in sheet */
-.q-chips{display:flex;gap:6px;}
+.q-chips{display:flex;gap:6px;flex-wrap:wrap;}
 .q-chip{
-  flex:1;padding:8px 4px;border-radius:var(--rs);font-size:11px;font-weight:700;
+  flex:1;min-width:40px;padding:8px 4px;border-radius:var(--rs);font-size:11px;font-weight:700;
   border:0.5px solid var(--border2);background:var(--surface2);color:var(--muted);
   cursor:pointer;text-align:center;transition:all .15s;letter-spacing:.3px;
 }
@@ -413,6 +413,8 @@ input[type=range]::-moz-range-thumb{
     <div class="sheet-section">
       <div class="sheet-section-lbl">Quality</div>
       <div class="q-chips" id="q-chips">
+        <div class="q-chip" data-q="1">1%</div>
+        <div class="q-chip" data-q="5">5%</div>
         <div class="q-chip" data-q="10">Min</div>
         <div class="q-chip" data-q="30">Low</div>
         <div class="q-chip on" data-q="60">Med</div>
