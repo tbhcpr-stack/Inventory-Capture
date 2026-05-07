@@ -632,17 +632,17 @@ function applyRatio(ratio){
   if(ratio==='free')return;
   const[rw,rh]=ratio.split(':').map(Number);
   const{w,h}=vfSize();
-  const vfAspect=w/h;
-  const cropAspect=rw/rh;
-  // keep center, adjust dims
+  // Crop coords are 0-1 of vf width/height.
+  // To make the box look like rw:rh on screen we need:
+  //   box_px_w / box_px_h = rw/rh
+  //   (nw*w) / (nh*h) = rw/rh  →  nh = nw*(w/h)*(rh/rw)
   const cx=crop.x+crop.w/2, cy=crop.y+crop.h/2;
-  let nw=crop.w, nh=crop.h;
-  if(cropAspect>vfAspect){
-    nw=crop.w;
-    nh=nw*(rh/rw)*(w/h);
-  } else {
-    nh=crop.h;
-    nw=nh*(rw/rh)*(h/w);
+  let nw=crop.w;
+  let nh=nw*(w/h)*(rh/rw);
+  // If height exceeds bounds, clamp via height and recompute width
+  if(nh>0.96){
+    nh=0.96;
+    nw=nh*(h/w)*(rw/rh);
   }
   crop.w=Math.min(0.96,nw);
   crop.h=Math.min(0.96,nh);
@@ -701,7 +701,8 @@ function applyRatioFromCenter(){
   const{w,h}=vfSize();
   const cx=crop.x+crop.w/2, cy=crop.y+crop.h/2;
   const nw=crop.w;
-  const nh=nw*(rh/rw)*(w/h);
+  // nh in normalized units so that box_px_w/box_px_h = rw/rh
+  const nh=nw*(w/h)*(rh/rw);
   crop.h=nh;
   crop.y=cy-crop.h/2;
 }
