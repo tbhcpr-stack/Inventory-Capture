@@ -10499,7 +10499,6 @@ body {
       video.srcObject = stream;
       await video.play();
 
-<<<<<<< HEAD
       // Apply optimal Chrome Mobile camera settings
       const track = stream.getVideoTracks()[0];
       const capabilities = track.getCapabilities ? track.getCapabilities() : {};
@@ -10540,16 +10539,6 @@ body {
         }
       });
 
-=======
-      // Try enabling continuous focus mode if supported
-      const track = stream.getVideoTracks()[0];
-      const capabilities = track.getCapabilities();
-      if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
-        await track.applyConstraints({
-          advanced: [{ focusMode: 'continuous' }]
-        }).catch(e => console.log('focusMode error', e));
-      }
->>>>>>> 59f067b099f75e09c1f783091b059ae6991f5422
     } catch(e) {
       showToast('Camera error: ' + e.message);
     }
@@ -10711,7 +10700,6 @@ body {
     }
   };
 
-<<<<<<< HEAD
   // ── Barcode Scanner ─────────────────────────────────────────────────────────
   // Primary: native BarcodeDetector (Chrome Android) — EAN-13, UPC, Code-128, etc.
   // Fallback: jsQR (QR codes only) for browsers without BarcodeDetector.
@@ -10719,11 +10707,6 @@ body {
   let nativeBarcodeDetector = null;
   let scanPending = false; // prevents async pile-up in BarcodeDetector loop
 
-=======
-  // Barcode Scanner Logic — uses native BarcodeDetector (EAN-13, UPC-A, Code-128, Code-39, QR, etc.)
-  // Falls back to jsQR (QR codes only) on unsupported browsers.
-  let nativeBarcodeDetector = null;
->>>>>>> 59f067b099f75e09c1f783091b059ae6991f5422
   const SUPPORTED_FORMATS = [
     'ean_13','ean_8','upc_a','upc_e',
     'code_39','code_128','code_93',
@@ -10737,7 +10720,6 @@ body {
         const formats = SUPPORTED_FORMATS.filter(f => supported.includes(f));
         if (formats.length > 0) {
           nativeBarcodeDetector = new BarcodeDetector({ formats });
-<<<<<<< HEAD
           console.log('[BarcodeDetector] ready, formats:', formats.join(', '));
         }
       } catch(e) {
@@ -10746,26 +10728,6 @@ body {
     } else {
       console.log('[BarcodeDetector] not available, using jsQR fallback');
     }
-=======
-          console.log('BarcodeDetector ready, formats:', formats);
-        }
-      } catch(e) {
-        console.log('BarcodeDetector init failed, using jsQR fallback:', e);
-      }
-    } else {
-      console.log('BarcodeDetector not available, using jsQR fallback');
-    }
-  }
-
-  initBarcodeDetector();
-
-  function startQrScan() {
-    if (scanning) return;
-    scanning = true;
-    qrBtn.classList.add('scanning');
-    qrScanBox.classList.add('active');
-    scanFrame();
->>>>>>> 59f067b099f75e09c1f783091b059ae6991f5422
   }
 
   initBarcodeDetector();
@@ -10821,7 +10783,6 @@ body {
     releaseWakeLock();
   }
 
-<<<<<<< HEAD
   function startScan() {
     if (scanning) { stopScan(); return; }
     scanning = true;
@@ -10893,65 +10854,6 @@ body {
 
   qrBtn.onclick = startScan;
   qrCancel.onclick = stopScan;
-=======
-  // Native BarcodeDetector scans directly from the video stream (no canvas needed)
-  async function scanWithNativeDetector() {
-    if (!scanning) return;
-    try {
-      const barcodes = await nativeBarcodeDetector.detect(video);
-      if (barcodes.length > 0 && barcodes[0].rawValue.trim()) {
-        nameInput.value = barcodes[0].rawValue.trim();
-        stopQrScan();
-        showToast('✓ Barcode Decoded!');
-        return;
-      }
-    } catch(e) {}
-    if (scanning) qrAnimId = requestAnimationFrame(scanWithNativeDetector);
-  }
-
-  // jsQR fallback — QR codes only, uses canvas
-  function scanFrame() {
-    if (!scanning) return;
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      let w = video.videoWidth, h = video.videoHeight;
-      const maxDim = 640;
-      if (w > maxDim || h > maxDim) {
-        const ratio = Math.min(maxDim / w, maxDim / h);
-        w = Math.floor(w * ratio);
-        h = Math.floor(h * ratio);
-      }
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(video, 0, 0, w, h);
-      try {
-        const imgData = canvas.getContext('2d').getImageData(0, 0, w, h);
-        const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
-        if (code && code.data.trim()) {
-          nameInput.value = code.data.trim();
-          stopQrScan();
-          showToast('✓ QR Decoded!');
-          return;
-        }
-      } catch(e) {}
-    }
-    if (scanning) qrAnimId = requestAnimationFrame(scanFrame);
-  }
-
-  function startScan() {
-    if (scanning) { stopQrScan(); return; }
-    scanning = true;
-    qrBtn.classList.add('scanning');
-    qrScanBox.classList.add('active');
-    // Use native detector if available (handles real barcodes), else jsQR fallback
-    if (nativeBarcodeDetector) {
-      qrAnimId = requestAnimationFrame(scanWithNativeDetector);
-    } else {
-      scanFrame();
-    }
-  }
-
-  qrBtn.onclick = startScan;
-  qrCancel.onclick = stopQrScan;
->>>>>>> 59f067b099f75e09c1f783091b059ae6991f5422
 
   initCamera();
 })();
