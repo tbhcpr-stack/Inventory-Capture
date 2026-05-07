@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>SnapName — Premium Inventory Photo Scanner</title>
 <meta name="description" content="A high-performance web tool for capturing inventory photos, scanning barcodes, and optimizing file sizes for local storage.">
 <meta name="keywords" content="inventory, scanner, qr code, photo capture, image optimization, web app">
@@ -10135,11 +10139,11 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
   display: flex;
   flex-direction: column;
-  max-width: 430px;
-  margin: 0 auto;
+  margin: 0;
   user-select: none;
   -webkit-user-select: none;
   overflow: hidden;
@@ -10173,6 +10177,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
@@ -10199,9 +10206,10 @@ body {
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  flex-shrink: 0;
+  flex: 1;
+  display: flex;
 }
-#video, #qr-video { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+#video, #qr-video { width: 100%; height: 100%; object-fit: cover; display: block; }
 #canvas { display: none; }
 
 .vf-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
@@ -10282,16 +10290,12 @@ body {
 .chip.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 
 /* Preview & Save/Reject Flow */
-.preview-container {
-  background: var(--surface); border: 0.5px solid var(--border);
-  border-radius: var(--radius); overflow: hidden; display: none;
-  flex-direction: column;
-}
-.preview-container.active { display: flex; }
-#preview-img { width: 100%; object-fit: contain; background: #000; }
+#preview-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: none; z-index: 20; background: #000; }
+#preview-img.active { display: block; }
 .preview-actions {
-  padding: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  display: none; width: 100%; grid-template-columns: 1fr 1fr; gap: 12px;
 }
+.preview-actions.active { display: grid; }
 .btn {
   padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700;
   border: none; cursor: pointer; transition: all 0.2s;
@@ -10308,6 +10312,7 @@ body {
   box-shadow: 0 0 20px rgba(255,255,255,0.1);
 }
 .capture-btn:active { transform: scale(0.85); }
+.capture-btn.hidden { display: none; }
 
 .live-badge {
   position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
@@ -10332,10 +10337,12 @@ body {
 <div class="toast" id="toast"></div>
 
 <div class="header">
-  <div class="logo">Snap<span>Name</span></div>
-  <button class="settings-btn" id="settings-btn" aria-label="Settings">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-  </button>
+  <div class="logo" style="max-width: 500px; margin: 0 auto; width: 100%; display: flex; justify-content: space-between; align-items: center;">
+    <div>Snap<span>Name</span></div>
+    <button class="settings-btn" id="settings-btn" aria-label="Settings">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    </button>
+  </div>
 </div>
 
 <div class="scroll-content">
@@ -10346,14 +10353,22 @@ body {
     </div>
     <video id="video" autoplay playsinline muted></video>
     <canvas id="canvas"></canvas>
-    <div class="vf-overlay">
+    <img id="preview-img" alt="Captured Photo">
+    <div id="crop-overlay" style="position: absolute; border: 2px solid var(--accent); pointer-events: none; z-index: 5; display: none;"></div>
+    <div class="vf-overlay" id="vf-overlay">
       <div class="vf-corner"></div>
       <div class="vf-corner-br"></div>
     </div>
     <div class="qr-scan-box" id="qr-scan-box">
       <div class="qr-scan-frame"><div class="qr-scan-line"></div></div>
-      <div class="qr-label" style="margin-top: 15px; font-size: 14px; font-weight: 500;">Scanning Barcode...</div>
-      <button class="btn btn-reject" id="qr-cancel" style="margin-top: 20px; padding: 10px 20px;">Cancel</button>
+      <div class="qr-label" style="margin-top: 15px; font-size: 14px; font-weight: 500;" id="scan-status">Scanning Barcode...</div>
+      <div style="display:flex; gap:12px; margin-top: 20px;">
+        <button class="btn" id="torch-btn" style="padding: 10px 18px; background: var(--amber-dim); border: 0.5px solid var(--amber-border); color: var(--amber); display:none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+          Torch
+        </button>
+        <button class="btn btn-reject" id="qr-cancel" style="padding: 10px 20px;">Cancel</button>
+      </div>
     </div>
   </div>
 
@@ -10367,9 +10382,12 @@ body {
     </div>
   </div>
 
-  <div class="preview-container" id="preview-container">
-    <img id="preview-img" alt="Captured Photo">
-    <div class="preview-actions">
+</div>
+
+<div class="bottom-bar">
+  <div style="max-width: 500px; margin: 0 auto; width: 100%;">
+    <button class="capture-btn" id="capture-btn" aria-label="Capture Photo"></button>
+    <div class="preview-actions" id="preview-actions">
       <button class="btn btn-reject" id="reject-btn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"></path></svg>
         Reject
@@ -10380,10 +10398,6 @@ body {
       </button>
     </div>
   </div>
-</div>
-
-<div class="bottom-bar">
-  <button class="capture-btn" id="capture-btn" aria-label="Capture Photo"></button>
 </div>
 
 <!-- Settings Modal -->
@@ -10407,10 +10421,12 @@ body {
       </div>
 
       <div class="setting-item">
-        <div class="field-label">Compression Mode</div>
+        <div class="field-label">Quality</div>
         <div class="chip-row" id="comp-row">
-          <div class="chip active" data-val="auto">Auto</div>
-          <div class="chip" data-val="manual">Manual (High Qual)</div>
+          <div class="chip" data-val="0.3">Low</div>
+          <div class="chip" data-val="0.6">Medium</div>
+          <div class="chip active" data-val="0.8">High</div>
+          <div class="chip" data-val="1.0">Max</div>
         </div>
       </div>
 
@@ -10436,8 +10452,10 @@ body {
   const qrScanBox = document.getElementById('qr-scan-box');
   const qrCancel = document.getElementById('qr-cancel');
   const captureBtn = document.getElementById('capture-btn');
-  const previewContainer = document.getElementById('preview-container');
   const previewImg = document.getElementById('preview-img');
+  const previewActions = document.getElementById('preview-actions');
+  const vfOverlay = document.getElementById('vf-overlay');
+  const cropOverlay = document.getElementById('crop-overlay');
   const saveBtn = document.getElementById('save-btn');
   const rejectBtn = document.getElementById('reject-btn');
   const settingsBtn = document.getElementById('settings-btn');
@@ -10451,11 +10469,16 @@ body {
   let capturedBlob = null;
   let scanning = false;
   let qrAnimId = null;
+  let wakeLock = null;
+  let torchOn = false;
+  let torchAvailable = false;
+  let lastScanTime = 0;
+  const SCAN_INTERVAL_MS = 120; // ~8fps throttle for BarcodeDetector
 
   // Settings State
   let config = {
     type: 'webp',
-    compression: 'auto',
+    compression: '0.8',
     ratio: 'original'
   };
 
@@ -10468,11 +10491,56 @@ body {
   async function initCamera() {
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        },
         audio: false
       });
       video.srcObject = stream;
       await video.play();
+
+      // Apply optimal Chrome Mobile camera settings
+      const track = stream.getVideoTracks()[0];
+      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+      const advancedConstraints = [];
+
+      if (capabilities.focusMode && capabilities.focusMode.includes('continuous'))
+        advancedConstraints.push({ focusMode: 'continuous' });
+      if (capabilities.exposureMode && capabilities.exposureMode.includes('continuous'))
+        advancedConstraints.push({ exposureMode: 'continuous' });
+      if (capabilities.whiteBalanceMode && capabilities.whiteBalanceMode.includes('continuous'))
+        advancedConstraints.push({ whiteBalanceMode: 'continuous' });
+
+      if (advancedConstraints.length > 0)
+        await track.applyConstraints({ advanced: advancedConstraints }).catch(() => {});
+
+      // Torch support check
+      if (capabilities.torch) {
+        torchAvailable = true;
+        document.getElementById('torch-btn').style.display = 'flex';
+      }
+
+      // Tap-to-focus on viewfinder
+      document.querySelector('.viewfinder-wrap').addEventListener('click', async (e) => {
+        if (!stream || scanning) return;
+        const rect = video.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        const cap = track.getCapabilities ? track.getCapabilities() : {};
+        if (cap.focusMode && cap.focusMode.includes('manual') && cap.pointsOfInterest) {
+          await track.applyConstraints({
+            advanced: [{ focusMode: 'manual', pointsOfInterest: [{ x, y }] }]
+          }).catch(() => {});
+          // Return to continuous after short lock
+          setTimeout(() => {
+            if (cap.focusMode.includes('continuous'))
+              track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+          }, 2500);
+        }
+      });
+
     } catch(e) {
       showToast('Camera error: ' + e.message);
     }
@@ -10483,6 +10551,53 @@ body {
   closeSettings.onclick = () => settingsModal.classList.remove('active');
   window.onclick = (e) => { if(e.target === settingsModal) settingsModal.classList.remove('active'); }
 
+  function updateCropOverlay() {
+    if (!video.videoWidth) return;
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+    const rect = video.getBoundingClientRect();
+    
+    const containerRatio = rect.width / rect.height;
+    const videoRatio = vw / vh;
+    
+    let renderedW = rect.width;
+    let renderedH = rect.height;
+    
+    // With object-fit: cover
+    if (containerRatio > videoRatio) {
+      renderedW = rect.width;
+      renderedH = rect.width / videoRatio;
+    } else {
+      renderedH = rect.height;
+      renderedW = rect.height * videoRatio;
+    }
+    
+    if (config.ratio === 'original') {
+      cropOverlay.style.width = renderedW + 'px';
+      cropOverlay.style.height = renderedH + 'px';
+    } else {
+      const [rW, rH] = config.ratio.split(':').map(Number);
+      const targetRatio = rW / rH;
+      let cropW = renderedW, cropH = renderedH;
+      
+      if (videoRatio > targetRatio) {
+        cropW = renderedH * targetRatio;
+      } else {
+        cropH = renderedW / targetRatio;
+      }
+      cropOverlay.style.width = cropW + 'px';
+      cropOverlay.style.height = cropH + 'px';
+    }
+    
+    cropOverlay.style.left = '50%';
+    cropOverlay.style.top = '50%';
+    cropOverlay.style.transform = 'translate(-50%, -50%)';
+    cropOverlay.style.display = 'block';
+  }
+  
+  window.addEventListener('resize', updateCropOverlay);
+  video.addEventListener('loadedmetadata', updateCropOverlay);
+
   // Settings Picker Logic
   function setupChips(rowId, key) {
     const row = document.getElementById(rowId);
@@ -10491,6 +10606,7 @@ body {
         row.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         config[key] = chip.dataset.val;
+        if (key === 'ratio') updateCropOverlay();
       };
     });
   }
@@ -10526,76 +10642,220 @@ body {
     canvas.getContext('2d').drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
 
     // Compression & File Generation
-    const quality = config.compression === 'auto' ? 0.75 : 0.95;
+    const quality = parseFloat(config.compression);
     const mime = `image/${config.type}`;
     
     canvas.toBlob(blob => {
       capturedBlob = blob;
       previewImg.src = URL.createObjectURL(blob);
-      previewContainer.classList.add('active');
+      previewImg.classList.add('active');
+      vfOverlay.style.display = 'none';
+      cropOverlay.style.display = 'none';
+      captureBtn.classList.add('hidden');
+      previewActions.classList.add('active');
       liveBadge.style.display = 'flex';
       sizeText.textContent = (blob.size / 1024).toFixed(1) + ' KB';
-      previewContainer.scrollIntoView({ behavior: 'smooth' });
     }, mime, quality);
   };
 
   // Save/Reject Handlers
   rejectBtn.onclick = () => {
     capturedBlob = null;
-    previewContainer.classList.remove('active');
+    previewImg.classList.remove('active');
+    vfOverlay.style.display = 'flex';
+    updateCropOverlay();
+    captureBtn.classList.remove('hidden');
+    previewActions.classList.remove('active');
     liveBadge.style.display = 'none';
   };
 
-  saveBtn.onclick = () => {
+  saveBtn.onclick = async () => {
     if(!capturedBlob) return;
     const name = nameInput.value.trim() || 'inventory';
     const ext = config.type === 'jpeg' ? 'jpg' : config.type;
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(capturedBlob);
-    link.download = `${name}.${ext}`;
-    link.click();
-    showToast('Image Saved Successfully');
-    rejectBtn.onclick(); // Clear preview
+    
+    try {
+      if (window.showSaveFilePicker) {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: `${name}.${ext}`,
+          types: [{
+            description: 'Image',
+            accept: { [`image/${config.type}`]: [`.${ext}`] },
+          }],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(capturedBlob);
+        await writable.close();
+      } else {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(capturedBlob);
+        link.download = `${name}.${ext}`;
+        link.click();
+      }
+      showToast('Image Saved Successfully');
+      nameInput.value = ''; // clear field after confirm
+      rejectBtn.onclick(); // Clear preview
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        showToast('Error saving file: ' + err.message);
+      }
+    }
   };
 
-  // QR / Barcode Scanner Logic
-  function startQrScan() {
-    if (scanning) return;
-    scanning = true;
-    qrBtn.classList.add('scanning');
-    qrScanBox.classList.add('active');
-    scanFrame();
+  // ── Barcode Scanner ─────────────────────────────────────────────────────────
+  // Primary: native BarcodeDetector (Chrome Android) — EAN-13, UPC, Code-128, etc.
+  // Fallback: jsQR (QR codes only) for browsers without BarcodeDetector.
+
+  let nativeBarcodeDetector = null;
+  let scanPending = false; // prevents async pile-up in BarcodeDetector loop
+
+  const SUPPORTED_FORMATS = [
+    'ean_13','ean_8','upc_a','upc_e',
+    'code_39','code_128','code_93',
+    'itf','codabar','data_matrix','qr_code','pdf417','aztec'
+  ];
+
+  async function initBarcodeDetector() {
+    if ('BarcodeDetector' in window) {
+      try {
+        const supported = await BarcodeDetector.getSupportedFormats();
+        const formats = SUPPORTED_FORMATS.filter(f => supported.includes(f));
+        if (formats.length > 0) {
+          nativeBarcodeDetector = new BarcodeDetector({ formats });
+          console.log('[BarcodeDetector] ready, formats:', formats.join(', '));
+        }
+      } catch(e) {
+        console.log('[BarcodeDetector] init failed, using jsQR fallback');
+      }
+    } else {
+      console.log('[BarcodeDetector] not available, using jsQR fallback');
+    }
   }
 
-  function stopQrScan() {
+  initBarcodeDetector();
+
+  // ── WakeLock: keep screen on while scanning ──────────────────────────────────
+  async function acquireWakeLock() {
+    if ('wakeLock' in navigator && !wakeLock) {
+      try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+    }
+  }
+  async function releaseWakeLock() {
+    if (wakeLock) { try { await wakeLock.release(); } catch(e) {} wakeLock = null; }
+  }
+  // Re-acquire after tab becomes visible again
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && scanning) acquireWakeLock();
+  });
+
+  // ── Torch toggle ─────────────────────────────────────────────────────────────
+  const torchBtn = document.getElementById('torch-btn');
+  torchBtn.onclick = async (e) => {
+    e.stopPropagation();
+    if (!stream || !torchAvailable) return;
+    torchOn = !torchOn;
+    const track = stream.getVideoTracks()[0];
+    await track.applyConstraints({ advanced: [{ torch: torchOn }] }).catch(() => { torchOn = false; });
+    torchBtn.style.background = torchOn ? 'var(--amber-dim)' : '';
+    torchBtn.style.opacity = torchOn ? '1' : '0.7';
+  };
+
+  // ── On-decode success ────────────────────────────────────────────────────────
+  function onBarcodeFound(value, format) {
+    nameInput.value = value;
+    stopScan();
+    showToast('✓ ' + (format ? format.toUpperCase().replace('_', '-') : 'Barcode') + ' Decoded!');
+    // Haptic feedback (Chrome Android)
+    if (navigator.vibrate) navigator.vibrate([60, 30, 60]);
+  }
+
+  // ── Start / Stop ─────────────────────────────────────────────────────────────
+  function stopScan() {
     scanning = false;
+    scanPending = false;
     qrBtn.classList.remove('scanning');
     qrScanBox.classList.remove('active');
     if (qrAnimId) { cancelAnimationFrame(qrAnimId); qrAnimId = null; }
+    // Turn off torch when scan ends
+    if (torchOn && stream) {
+      torchOn = false;
+      torchBtn.style.background = '';
+      stream.getVideoTracks()[0].applyConstraints({ advanced: [{ torch: false }] }).catch(() => {});
+    }
+    releaseWakeLock();
   }
 
-  function scanFrame() {
+  function startScan() {
+    if (scanning) { stopScan(); return; }
+    scanning = true;
+    scanPending = false;
+    lastScanTime = 0;
+    qrBtn.classList.add('scanning');
+    qrScanBox.classList.add('active');
+    document.getElementById('scan-status').textContent = 'Scanning Barcode...';
+    acquireWakeLock();
+    if (nativeBarcodeDetector) {
+      scanNativeLoop();
+    } else {
+      scanJsQrLoop();
+    }
+  }
+
+  // ── Native BarcodeDetector loop (throttled to SCAN_INTERVAL_MS) ───────────────
+  function scanNativeLoop() {
     if (!scanning) return;
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      const w = video.videoWidth, h = video.videoHeight;
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(video, 0, 0, w, h);
+    qrAnimId = requestAnimationFrame(async (ts) => {
+      if (!scanning) return;
+      // Throttle: skip frame if not enough time has passed
+      if (ts - lastScanTime < SCAN_INTERVAL_MS || scanPending) {
+        scanNativeLoop();
+        return;
+      }
+      lastScanTime = ts;
+      scanPending = true;
       try {
-        const imgData = canvas.getContext('2d').getImageData(0, 0, w, h);
-        const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'dontInvert' });
-        if (code && code.data.trim()) {
-          nameInput.value = code.data.trim();
-          stopQrScan();
-          showToast('Barcode Decoded!');
-          return;
+        const barcodes = await nativeBarcodeDetector.detect(video);
+        if (barcodes.length > 0 && barcodes[0].rawValue.trim()) {
+          onBarcodeFound(barcodes[0].rawValue.trim(), barcodes[0].format);
+          return; // stop loop after success
         }
       } catch(e) {}
-    }
-    qrAnimId = requestAnimationFrame(scanFrame);
+      scanPending = false;
+      if (scanning) scanNativeLoop();
+    });
   }
 
-  qrBtn.onclick = () => scanning ? stopQrScan() : startQrScan();
-  qrCancel.onclick = stopQrScan;
+  // ── jsQR fallback loop (QR only, canvas-based) ────────────────────────────────
+  function scanJsQrLoop() {
+    if (!scanning) return;
+    qrAnimId = requestAnimationFrame((ts) => {
+      if (!scanning) return;
+      if (ts - lastScanTime < SCAN_INTERVAL_MS) { scanJsQrLoop(); return; }
+      lastScanTime = ts;
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        let w = video.videoWidth, h = video.videoHeight;
+        const maxDim = 640;
+        if (w > maxDim || h > maxDim) {
+          const r = Math.min(maxDim / w, maxDim / h);
+          w = Math.floor(w * r); h = Math.floor(h * r);
+        }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(video, 0, 0, w, h);
+        try {
+          const imgData = canvas.getContext('2d').getImageData(0, 0, w, h);
+          const code = jsQR(imgData.data, w, h, { inversionAttempts: 'attemptBoth' });
+          if (code && code.data.trim()) {
+            onBarcodeFound(code.data.trim(), 'qr_code');
+            return;
+          }
+        } catch(e) {}
+      }
+      if (scanning) scanJsQrLoop();
+    });
+  }
+
+  qrBtn.onclick = startScan;
+  qrCancel.onclick = stopScan;
 
   initCamera();
 })();
