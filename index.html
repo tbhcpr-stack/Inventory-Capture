@@ -10499,6 +10499,10 @@ body {
       video.srcObject = stream;
       await video.play();
 
+<<<<<<< HEAD
+      // Apply optimal Chrome Mobile camera settings
+=======
+<<<<<<< HEAD
       // Apply optimal Chrome Mobile camera settings
       const track = stream.getVideoTracks()[0];
       const capabilities = track.getCapabilities ? track.getCapabilities() : {};
@@ -10539,6 +10543,52 @@ body {
         }
       });
 
+=======
+      // Try enabling continuous focus mode if supported
+>>>>>>> 79520dc6b97bc3f2a6effd993fb0ba5fd4859986
+      const track = stream.getVideoTracks()[0];
+      const capabilities = track.getCapabilities ? track.getCapabilities() : {};
+      const advancedConstraints = [];
+
+      if (capabilities.focusMode && capabilities.focusMode.includes('continuous'))
+        advancedConstraints.push({ focusMode: 'continuous' });
+      if (capabilities.exposureMode && capabilities.exposureMode.includes('continuous'))
+        advancedConstraints.push({ exposureMode: 'continuous' });
+      if (capabilities.whiteBalanceMode && capabilities.whiteBalanceMode.includes('continuous'))
+        advancedConstraints.push({ whiteBalanceMode: 'continuous' });
+
+      if (advancedConstraints.length > 0)
+        await track.applyConstraints({ advanced: advancedConstraints }).catch(() => {});
+
+      // Torch support check
+      if (capabilities.torch) {
+        torchAvailable = true;
+        document.getElementById('torch-btn').style.display = 'flex';
+      }
+<<<<<<< HEAD
+
+      // Tap-to-focus on viewfinder
+      document.querySelector('.viewfinder-wrap').addEventListener('click', async (e) => {
+        if (!stream || scanning) return;
+        const rect = video.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+        const cap = track.getCapabilities ? track.getCapabilities() : {};
+        if (cap.focusMode && cap.focusMode.includes('manual') && cap.pointsOfInterest) {
+          await track.applyConstraints({
+            advanced: [{ focusMode: 'manual', pointsOfInterest: [{ x, y }] }]
+          }).catch(() => {});
+          // Return to continuous after short lock
+          setTimeout(() => {
+            if (cap.focusMode.includes('continuous'))
+              track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] }).catch(() => {});
+          }, 2500);
+        }
+      });
+
+=======
+>>>>>>> 59f067b099f75e09c1f783091b059ae6991f5422
+>>>>>>> 79520dc6b97bc3f2a6effd993fb0ba5fd4859986
     } catch(e) {
       showToast('Camera error: ' + e.message);
     }
@@ -10700,13 +10750,28 @@ body {
     }
   };
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 79520dc6b97bc3f2a6effd993fb0ba5fd4859986
   // ── Barcode Scanner ─────────────────────────────────────────────────────────
   // Primary: native BarcodeDetector (Chrome Android) — EAN-13, UPC, Code-128, etc.
   // Fallback: jsQR (QR codes only) for browsers without BarcodeDetector.
 
+<<<<<<< HEAD
   let nativeBarcodeDetector = null;
   let scanPending = false; // prevents async pile-up in BarcodeDetector loop
 
+=======
+  let nativeBarcodeDetector = null;
+  let scanPending = false; // prevents async pile-up in BarcodeDetector loop
+
+=======
+  // Barcode Scanner Logic — uses native BarcodeDetector (EAN-13, UPC-A, Code-128, Code-39, QR, etc.)
+  // Falls back to jsQR (QR codes only) on unsupported browsers.
+  let nativeBarcodeDetector = null;
+>>>>>>> 59f067b099f75e09c1f783091b059ae6991f5422
+>>>>>>> 79520dc6b97bc3f2a6effd993fb0ba5fd4859986
   const SUPPORTED_FORMATS = [
     'ean_13','ean_8','upc_a','upc_e',
     'code_39','code_128','code_93',
@@ -10720,6 +10785,10 @@ body {
         const formats = SUPPORTED_FORMATS.filter(f => supported.includes(f));
         if (formats.length > 0) {
           nativeBarcodeDetector = new BarcodeDetector({ formats });
+<<<<<<< HEAD
+          console.log('[BarcodeDetector] ready, formats:', formats.join(', '));
+=======
+<<<<<<< HEAD
           console.log('[BarcodeDetector] ready, formats:', formats.join(', '));
         }
       } catch(e) {
@@ -10728,6 +10797,64 @@ body {
     } else {
       console.log('[BarcodeDetector] not available, using jsQR fallback');
     }
+=======
+          console.log('BarcodeDetector ready, formats:', formats);
+>>>>>>> 79520dc6b97bc3f2a6effd993fb0ba5fd4859986
+        }
+      } catch(e) {
+        console.log('[BarcodeDetector] init failed, using jsQR fallback');
+      }
+    } else {
+      console.log('[BarcodeDetector] not available, using jsQR fallback');
+    }
+  }
+
+  initBarcodeDetector();
+
+<<<<<<< HEAD
+  // ── WakeLock: keep screen on while scanning ──────────────────────────────────
+  async function acquireWakeLock() {
+    if ('wakeLock' in navigator && !wakeLock) {
+      try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+    }
+  }
+  async function releaseWakeLock() {
+    if (wakeLock) { try { await wakeLock.release(); } catch(e) {} wakeLock = null; }
+  }
+  // Re-acquire after tab becomes visible again
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && scanning) acquireWakeLock();
+  });
+
+  // ── Torch toggle ─────────────────────────────────────────────────────────────
+  const torchBtn = document.getElementById('torch-btn');
+  torchBtn.onclick = async (e) => {
+    e.stopPropagation();
+    if (!stream || !torchAvailable) return;
+    torchOn = !torchOn;
+    const track = stream.getVideoTracks()[0];
+    await track.applyConstraints({ advanced: [{ torch: torchOn }] }).catch(() => { torchOn = false; });
+    torchBtn.style.background = torchOn ? 'var(--amber-dim)' : '';
+    torchBtn.style.opacity = torchOn ? '1' : '0.7';
+  };
+
+  // ── On-decode success ────────────────────────────────────────────────────────
+  function onBarcodeFound(value, format) {
+    nameInput.value = value;
+    stopScan();
+    showToast('✓ ' + (format ? format.toUpperCase().replace('_', '-') : 'Barcode') + ' Decoded!');
+    // Haptic feedback (Chrome Android)
+    if (navigator.vibrate) navigator.vibrate([60, 30, 60]);
+  }
+
+=======
+  function startQrScan() {
+    if (scanning) return;
+    scanning = true;
+    qrBtn.classList.add('scanning');
+    qrScanBox.classList.add('active');
+    scanFrame();
+>>>>>>> 59f067b099f75e09c1f783091b059ae6991f5422
   }
 
   initBarcodeDetector();
@@ -10767,6 +10894,7 @@ body {
     if (navigator.vibrate) navigator.vibrate([60, 30, 60]);
   }
 
+>>>>>>> 79520dc6b97bc3f2a6effd993fb0ba5fd4859986
   // ── Start / Stop ─────────────────────────────────────────────────────────────
   function stopScan() {
     scanning = false;
@@ -10779,6 +10907,124 @@ body {
       torchOn = false;
       torchBtn.style.background = '';
       stream.getVideoTracks()[0].applyConstraints({ advanced: [{ torch: false }] }).catch(() => {});
+<<<<<<< HEAD
+=======
+    }
+    releaseWakeLock();
+  }
+
+<<<<<<< HEAD
+  function startScan() {
+    if (scanning) { stopScan(); return; }
+    scanning = true;
+    scanPending = false;
+    lastScanTime = 0;
+    qrBtn.classList.add('scanning');
+    qrScanBox.classList.add('active');
+    document.getElementById('scan-status').textContent = 'Scanning Barcode...';
+    acquireWakeLock();
+    if (nativeBarcodeDetector) {
+      scanNativeLoop();
+    } else {
+      scanJsQrLoop();
+    }
+  }
+
+  // ── Native BarcodeDetector loop (throttled to SCAN_INTERVAL_MS) ───────────────
+  function scanNativeLoop() {
+    if (!scanning) return;
+    qrAnimId = requestAnimationFrame(async (ts) => {
+      if (!scanning) return;
+      // Throttle: skip frame if not enough time has passed
+      if (ts - lastScanTime < SCAN_INTERVAL_MS || scanPending) {
+        scanNativeLoop();
+        return;
+      }
+      lastScanTime = ts;
+      scanPending = true;
+      try {
+        const barcodes = await nativeBarcodeDetector.detect(video);
+        if (barcodes.length > 0 && barcodes[0].rawValue.trim()) {
+          onBarcodeFound(barcodes[0].rawValue.trim(), barcodes[0].format);
+          return; // stop loop after success
+        }
+      } catch(e) {}
+      scanPending = false;
+      if (scanning) scanNativeLoop();
+    });
+  }
+
+  // ── jsQR fallback loop (QR only, canvas-based) ────────────────────────────────
+  function scanJsQrLoop() {
+    if (!scanning) return;
+    qrAnimId = requestAnimationFrame((ts) => {
+      if (!scanning) return;
+      if (ts - lastScanTime < SCAN_INTERVAL_MS) { scanJsQrLoop(); return; }
+      lastScanTime = ts;
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        let w = video.videoWidth, h = video.videoHeight;
+        const maxDim = 640;
+        if (w > maxDim || h > maxDim) {
+          const r = Math.min(maxDim / w, maxDim / h);
+          w = Math.floor(w * r); h = Math.floor(h * r);
+        }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(video, 0, 0, w, h);
+        try {
+          const imgData = canvas.getContext('2d').getImageData(0, 0, w, h);
+          const code = jsQR(imgData.data, w, h, { inversionAttempts: 'attemptBoth' });
+          if (code && code.data.trim()) {
+            onBarcodeFound(code.data.trim(), 'qr_code');
+            return;
+          }
+        } catch(e) {}
+      }
+      if (scanning) scanJsQrLoop();
+    });
+  }
+
+  qrBtn.onclick = startScan;
+  qrCancel.onclick = stopScan;
+=======
+  // Native BarcodeDetector scans directly from the video stream (no canvas needed)
+  async function scanWithNativeDetector() {
+    if (!scanning) return;
+    try {
+      const barcodes = await nativeBarcodeDetector.detect(video);
+      if (barcodes.length > 0 && barcodes[0].rawValue.trim()) {
+        nameInput.value = barcodes[0].rawValue.trim();
+        stopQrScan();
+        showToast('✓ Barcode Decoded!');
+        return;
+      }
+    } catch(e) {}
+    if (scanning) qrAnimId = requestAnimationFrame(scanWithNativeDetector);
+  }
+
+  // jsQR fallback — QR codes only, uses canvas
+  function scanFrame() {
+    if (!scanning) return;
+    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+      let w = video.videoWidth, h = video.videoHeight;
+      const maxDim = 640;
+      if (w > maxDim || h > maxDim) {
+        const ratio = Math.min(maxDim / w, maxDim / h);
+        w = Math.floor(w * ratio);
+        h = Math.floor(h * ratio);
+      }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(video, 0, 0, w, h);
+      try {
+        const imgData = canvas.getContext('2d').getImageData(0, 0, w, h);
+        const code = jsQR(imgData.data, imgData.width, imgData.height, { inversionAttempts: 'attemptBoth' });
+        if (code && code.data.trim()) {
+          nameInput.value = code.data.trim();
+          stopQrScan();
+          showToast('✓ QR Decoded!');
+          return;
+        }
+      } catch(e) {}
+>>>>>>> 79520dc6b97bc3f2a6effd993fb0ba5fd4859986
     }
     releaseWakeLock();
   }
@@ -10853,7 +11099,12 @@ body {
   }
 
   qrBtn.onclick = startScan;
+<<<<<<< HEAD
   qrCancel.onclick = stopScan;
+=======
+  qrCancel.onclick = stopQrScan;
+>>>>>>> 59f067b099f75e09c1f783091b059ae6991f5422
+>>>>>>> 79520dc6b97bc3f2a6effd993fb0ba5fd4859986
 
   initCamera();
 })();
